@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Frontend Consumo de API - PokéPortal</title>
+    
+    <!-- FAVICON: Icono de la pestaña del navegador usando logo.png -->
+    <link rel="icon" type="image/jpeg" href="logo.png" id="tab-favicon">
+    <link rel="shortcut icon" type="image/jpeg" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <link rel="stylesheet" href="styles.css">
+    <!-- Fuente moderna de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ENCABEZADO PRINCIPAL (Rojo difuminado hacia negro en el centro) -->
+    <header class="main-header">
+        <div class="header-container">
+            <!-- Perfil del Autor (Arriba a la izquierda) -->
+            <div class="user-profile">
+                <div class="avatar-frame">
+                    <img src="FU.jpg" alt="Francisco Javier Urbina Mejía" id="user-photo" 
+                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Francisco+Urbina&background=b30000&color=fff&size=150&bold=true';">
+                </div>
+                <div class="user-info">
+                    <span class="user-badge">DESARROLLADOR</span>
+                    <h2 class="user-name">Francisco Javier Urbina Mejía</h2>
+                    <p class="user-career">Ingeniería de Sistemas</p>
+                </div>
+            </div>
+
+            <!-- Título del Portal -->
+            <div class="portal-title">
+                <h1>POKÉPORTAL <span>API REST</span></h1>
+                <p>Guía Frontend Consumo de API Pública (PokéAPI v2)</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- MENÚ DE NAVEGACIÓN (Rojo difuminado hacia negro en el centro con relieves) -->
+    <nav class="main-menu">
+        <div class="menu-container">
+            <button class="menu-btn active" data-target="seccion-ambos" onclick="cambiarVista('ambos', this)">
+                ⚡ Vista Completa
+            </button>
+            <button class="menu-btn" data-target="seccion-buscar" onclick="cambiarVista('buscar', this)">
+                🔍 Buscar Pokémon (ID / Nombre)
+            </button>
+            <button class="menu-btn" data-target="seccion-rango" onclick="cambiarVista('rango', this)">
+                📋 Listar por Rango (Limit & Offset)
+            </button>
+        </div>
+    </nav>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="main-content">
+
+        <!-- SECCIÓN 1: BÚSQUEDA INDIVIDUAL POR NOMBRE O NÚMERO -->
+        <section id="panel-busqueda" class="card-relief section-panel">
+            <div class="card-header-gradient">
+                <h3>🔍 Búsqueda Individual de Pokémon</h3>
+                <span class="endpoint-tag">GET /api/v2/pokemon/:identificador</span>
+            </div>
+
+            <div class="card-body">
+                <p class="section-desc">
+                    Ingresa el <strong>nombre</strong> (ej. <em>Arceus, Pikachu, Gengar</em>) o el <strong>número de Pokédex</strong> (ej. <em>1, 25, 493</em>) para consultar sus datos en tiempo real.
+                </p>
+
+                <form id="form-buscar" class="search-controls" onsubmit="event.preventDefault(); buscarPokemonIndividual();">
+                    <div class="input-group">
+                        <label for="input-identificador">Pokémon o N° de Pokédex</label>
+                        <input type="text" id="input-identificador" placeholder="Ej: Arceus o 493..." value="Arceus" required>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn-action btn-primary">
+                            🔎 Buscar Pokémon
+                        </button>
+                        <button type="button" class="btn-action btn-secondary" onclick="buscarPokemonAleatorio()">
+                            🎲 Aleatorio
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Barra de URL consultada -->
+                <div class="url-preview">
+                    <span>Endpoint consumido:</span>
+                    <code id="url-individual-display">https://pokeapi.co/api/v2/pokemon/arceus</code>
+                </div>
+
+                <!-- Contenedor del Resultado Individual -->
+                <div id="resultado-individual" class="pokemon-showcase">
+                    <!-- Se llena dinámicamente desde JS/TS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: LISTADO DE POKÉMON POR RANGO ESTABLECIDO -->
+        <section id="panel-rango" class="card-relief section-panel">
+            <div class="card-header-gradient">
+                <h3>📋 Explorador de Pokémon por Rango</h3>
+                <span class="endpoint-tag">GET /api/v2/pokemon?limit={X}&amp;offset={Y}</span>
+            </div>
+
+            <div class="card-body">
+                <p class="section-desc">
+                    Establece el rango numérico de la Pokédex que deseas listar. El sistema traduce automáticamente el rango a los parámetros <code>limit</code> y <code>offset</code> de la API.
+                </p>
+
+                <form id="form-rango" class="range-controls" onsubmit="event.preventDefault(); cargarListaPorRango();">
+                    <div class="input-group">
+                        <label for="input-inicio">Desde el N° (Inicio)</label>
+                        <input type="number" id="input-inicio" min="1" max="1025" value="1" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="input-fin">Hasta el N° (Fin)</label>
+                        <input type="number" id="input-fin" min="1" max="1025" value="10" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Equivalencia en API</label>
+                        <div class="api-params-badge" id="badge-params">
+                            limit: <strong>10</strong> | offset: <strong>0</strong>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn-action btn-primary">
+                            📥 Mostrar Rango
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Rangos rápidos preestablecidos -->
+                <div class="quick-ranges">
+                    <span>Rangos rápidos:</span>
+                    <button type="button" class="chip-btn" onclick="aplicarRangoRapido(1, 10)">#1 - #10 (Iniciales Kanto)</button>
+                    <button type="button" class="chip-btn" onclick="aplicarRangoRapido(144, 151)">#144 - #151 (Legendarios Kanto)</button>
+                    <button type="button" class="chip-btn" onclick="aplicarRangoRapido(243, 251)">#243 - #251 (Legendarios Johto)</button>
+                    <button type="button" class="chip-btn" onclick="aplicarRangoRapido(483, 493)">#483 - #493 (Trío Creación / Arceus)</button>
+                </div>
+
+                <!-- Barra de URL consultada -->
+                <div class="url-preview">
+                    <span>Endpoint consumido:</span>
+                    <code id="url-lista-display">https://pokeapi.co/api/v2/pokemon?limit=10&amp;offset=0</code>
+                </div>
+
+                <!-- Contenedor Grid de la Lista de Pokémon -->
+                <div id="resultado-lista" class="pokemon-grid">
+                    <!-- Se llena dinámicamente desde JS/TS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="main-footer">
+        <p>Desarrollado por <strong>Francisco Javier Urbina Mejía</strong> • Ingeniería de Sistemas • Guía Frontend Consumo de API</p>
+    </footer>
+
+    <!-- Script de lógica -->
+    <script src="app.js"></script>
+</body>
+</html>
